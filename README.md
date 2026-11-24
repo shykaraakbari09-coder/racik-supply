@@ -99,11 +99,12 @@ Product data is stored in the database and managed via the admin dashboard. The 
 
 ## Image credits
 
-Product photos for the powders sourced from Wikimedia Commons:
+Product photos sourced from Wikimedia Commons:
 
 - Matcha powder flat-lay — "Matcha layout with leaf, tea, and powder" by dungthuyvunguyen (CC0)
 - Matcha scoop — "Matcha Scoop" by Evanhoever (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0)
 - Taro powder — "Purple sweet potato powder" by Fumikas Sagisavas (CC0)
+- Vanilla syrup — "Various Monin syrups" by AgrisR (CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0)
 
 ## Notes
 
