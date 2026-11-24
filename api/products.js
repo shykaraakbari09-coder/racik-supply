@@ -1,5 +1,5 @@
 import { getSql, ensureSchema, rowToProduct, sanitize } from "../lib/db.js";
-import { readBody } from "../lib/auth.js";
+import { readBody, sameOrigin } from "../lib/auth.js";
 import { getAuth } from "../lib/sessions.js";
 
 const canEdit = (role) => role === "admin" || role === "staff";
@@ -7,6 +7,9 @@ const canCreateOrDelete = (role) => role === "admin";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
+  if (req.method !== "GET" && !sameOrigin(req)) {
+    return res.status(403).json({ error: "Permintaan tidak valid." });
+  }
   try {
     await ensureSchema();
     const sql = getSql();

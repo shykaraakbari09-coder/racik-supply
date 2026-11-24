@@ -14,16 +14,19 @@ The storefront is a static page that loads its catalog from a serverless API bac
 
 - Hero, product grid with search, sort, and category filters
 - Three quality tiers (Essential / Standard / Select)
-- Product detail specs and a working cart
+- Product detail specs and a working cart (quantity steppers, saved between visits)
 - WhatsApp order/checkout and supplier registration form
 - Responsive layout
-- **Admin dashboard** (`/admin.html`) with password login and product CRUD
+- **Admin dashboard** (`/admin`) with role-based login, product CRUD, and CSV export
 
 ## Structure
 
 ```
-index.html        # storefront: markup, styles, JS (cart, filtering, WhatsApp links)
-admin.html        # admin dashboard: login + product management UI
+index.html        # storefront markup + styles
+admin.html        # admin dashboard markup + styles
+js/
+  store.js        #   storefront logic (catalog, persistent cart, WhatsApp links)
+  admin.js        #   dashboard logic (login, product CRUD, CSV export)
 api/              # Vercel serverless functions
   products.js     #   GET (public) / PUT (admin+staff) / POST, DELETE (admin)
   login.js        #   role + password login (rate-limited), sets session cookie
@@ -35,7 +38,9 @@ lib/
   sessions.js     # session create/lookup/delete + request auth resolution
   rate-limit.js   # per-IP login failure tracking
 assets/           # product and hero images
-vercel.json       # security headers / CSP
+test/             # node:test suite (`npm test`)
+vercel.json       # security headers / CSP / caching
+robots.txt, sitemap.xml, 404.html
 ```
 
 ## Stack
@@ -58,6 +63,12 @@ Visit `/admin.html`, pick a role, and log in. Changes appear on the storefront i
 - Passwords are stored only as Vercel environment variables; comparisons are timing-safe.
 - Login is rate-limited per IP (8 failures / 15 min → HTTP 429) using a DB-backed counter, so it holds across serverless instances.
 - Sessions are server-side rows: the cookie holds an `HttpOnly`, `Secure`, `SameSite=Strict`, HMAC-signed token (4h expiry) referencing a session `sid`. Logout deletes the row, so sessions are truly revocable.
+- A second, global throttle (60 failures / 15 min across all IPs) stops distributed password guessing.
+- Password comparison hashes both sides first, so timing leaks neither content nor length.
+- `ADMIN_SECRET` shorter than 32 characters is refused at runtime.
+- Cross-origin writes are rejected (`Origin` / `Sec-Fetch-Site` check) on top of `SameSite=Strict`.
+- Product images must be an `assets/...` path or an `https://` URL; anything else is stored empty. All rendered values are HTML-escaped.
+- CSP forbids inline scripts (`script-src 'self'`); all JS lives in `js/`.
 - All SQL is parameterized; errors return generic messages (details are logged server-side).
 
 ### Required environment variables
@@ -71,13 +82,22 @@ Set in the Vercel project (all environments):
 | `STAFF_PASSWORD` | Staff login password                            |
 | `ADMIN_SECRET`   | Random secret used to sign session tokens       |
 
-Generate a secret with `openssl rand -hex 32`. To change a password:
+Generate a secret with `openssl rand -hex 32` (minimum 32 characters). To change a password:
 
 ```sh
 vercel env rm ADMIN_PASSWORD production
 vercel env add ADMIN_PASSWORD production
 vercel deploy --prod
 ```
+
+## Tests
+
+```sh
+npm install
+npm test
+```
+
+Covers token signing/expiry, password checks, same-origin enforcement, image/XSS sanitising, and that every API module loads.
 
 ## Local development
 

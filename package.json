@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Racik Supply — B2B supply marketplace + admin dashboard",
+  "description": "Racik Supply \u2014 B2B supply marketplace + admin dashboard",
   "dependencies": {
     "@neondatabase/serverless": "^1.2.1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
   }
 }
