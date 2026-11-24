@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import {
   checkPassword, createToken, sessionCookie, readBody, clientIp, ROLES
 } from "../lib/auth.js";
-import { createSession, clearFailures } from "../lib/sessions.js";
-import { countFailures, recordFailure, MAX_FAILURES } from "../lib/rate-limit.js";
+import { createSession } from "../lib/sessions.js";
+import { countFailures, recordFailure, clearFailures, MAX_FAILURES } from "../lib/rate-limit.js";
 import { ensureSchema } from "../lib/db.js";
 
 export default async function handler(req, res) {
