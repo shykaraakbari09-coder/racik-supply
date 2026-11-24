@@ -45,7 +45,7 @@
       ]
     },
     {
-      "source": "/(admin|admin.html|api/(.*))",
+      "source": "/admin",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -54,7 +54,34 @@
       ]
     },
     {
-      "source": "/(assets|js)/(.*)",
+      "source": "/admin.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
