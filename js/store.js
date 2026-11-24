@@ -1,8 +1,8 @@
 "use strict";
 // Ganti nomor ini dengan nomor WhatsApp bisnis/admin dalam format internasional tanpa + atau spasi.
-const WHATSAPP_NUMBER = "6289653922882";
+const WHATSAPP_NUMBER = "6298653922882";
 // Untuk asisten AI sungguhan, arahkan nomor ini ke WhatsApp Business Platform + backend chatbot.
-const AI_WHATSAPP_NUMBER = "6289653922882";
+const AI_WHATSAPP_NUMBER = "6298653922882";
 const CART_KEY = "racik_cart_v1";
 const MAX_QTY = 999;
 const PLACEHOLDER = "data:image/svg+xml," + encodeURIComponent(
@@ -66,10 +66,11 @@ function removeItem(id) { cart = cart.filter((i) => i.id !== id); saveCart(); up
 
 function updateCart() {
   const lines = cartLines();
-  $("cartCount").textContent = lines.reduce((s, l) => s + l.qty, 0);
+  const badge = $("cartCount"), count = String(lines.reduce((s, l) => s + l.qty, 0));
+  if (badge.textContent !== count) { badge.textContent = count; badge.classList.remove("bump"); void badge.offsetWidth; badge.classList.add("bump"); }
   $("cartItems").innerHTML = lines.length ? lines.map((l) => `
     <div class="cart-item">
-      <div><b>${esc(l.name)}</b><small>${esc(l.supplier)} · ${rupiah(l.price)} / ${esc(l.unit)}</small>
+      <div><b>${esc(l.name)}</b><small>${esc(l.supplier)}<br>${rupiah(l.price)} per ${esc(l.unit)}</small>
         <div class="qty" role="group" aria-label="Jumlah ${esc(l.name)}">
           <button type="button" data-action="dec" data-id="${l.id}" aria-label="Kurangi">−</button>
           <span>${l.qty}</span>
@@ -92,7 +93,19 @@ function render() {
   if (sort === "low") list.sort((a, b) => a.price - b.price);
   if (sort === "high") list.sort((a, b) => b.price - a.price);
   $("products").innerHTML = list.length ? list.map((p) => `<article class="product"><div class="photo"><img src="${esc(p.img || PLACEHOLDER)}" alt="${esc(p.name)}" width="900" height="600" loading="lazy"><span class="stamp">${esc(p.cat)}</span></div><div class="product-info"><div class="meta"><span>${esc(p.supplier)}</span><span class="tier">${esc(p.tier)}</span></div><h3>${esc(p.name)}</h3><div class="supplier">${esc(p.desc)}</div><div class="price">${rupiah(p.price)} <span class="unit">/ ${esc(p.unit)}</span></div><div class="card-actions"><button type="button" class="details" data-action="spec" data-id="${p.id}">Detail</button><button type="button" class="add" data-action="add" data-id="${p.id}">Tambah</button><button type="button" class="order" data-action="order" data-id="${p.id}">Tanya ↗</button></div><details class="spec" id="spec-${p.id}"><summary>Spesifikasi &amp; kualitas</summary><div class="spec-content"><b>Asal:</b> ${esc(p.origin)}<br><b>Grade:</b> ${esc(p.grade)}<br><b>Profil rasa:</b> ${esc(p.taste)}<br><b>Rekomendasi:</b> ${esc(p.use)}<br><b>Minimum order:</b> ${esc(p.moq)}<br><b>Ketersediaan:</b> ${esc(p.stock)}</div></details></div></article>`).join("")
-    : '<div class="empty">Produk tidak ditemukan. Coba kata kunci atau kategori lain.</div>';
+    : '<div class="empty">Tidak ada produk yang cocok. Coba kata kunci atau kategori lain.</div>';
+  $("products").querySelectorAll(".product").forEach((c, i) => c.style.setProperty("--i", Math.min(i, 8)));
+}
+
+// Hero receipt: shows the first three catalog items; only re-renders (and re-animates) if they changed.
+let notaKey = "";
+function renderNota() {
+  const picks = products.slice(0, 3);
+  const key = picks.map((p) => p.id + p.name + p.price).join("|");
+  if (key === notaKey) return;
+  notaKey = key;
+  $("notaLines").innerHTML = picks.map((p, i) => `<div class="nota-line" style="--i:${i}"><span>${esc(p.name)}<small>${esc(p.unit)}</small></span><b>${rupiah(p.price)}</b></div>`).join("");
+  $("notaTotal").textContent = rupiah(picks.reduce((s, p) => s + p.price, 0));
 }
 function toggleSpec(id) {
   const d = $("spec-" + id); if (!d) return;
@@ -170,9 +183,9 @@ $("partnerForm").addEventListener("submit", (e) => {
 });
 
 /* ---------- boot ---------- */
-render(); syncCart();
+render(); syncCart(); renderNota();
 // Muat katalog dari API (sumber: admin dashboard). Fallback ke data statis bila gagal.
 fetch("/api/products")
   .then((r) => (r.ok ? r.json() : Promise.reject()))
-  .then((d) => { if (Array.isArray(d.products) && d.products.length) { products = d.products; render(); syncCart(); } })
+  .then((d) => { if (Array.isArray(d.products) && d.products.length) { products = d.products; render(); syncCart(); renderNota(); } })
   .catch(() => {});

@@ -5,64 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin · Racik Supply</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23344b39'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23fff' text-anchor='middle'%3Er%3C/text%3E%3C/svg%3E">
-<style>
-:root{--ink:#20251f;--muted:#6c7268;--paper:#faf9f6;--white:#fff;--line:#e9e7e0;--green:#344b39;--soft:#edf0e8;--accent:#b47b50;--danger:#a4443a}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px}
-button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
-:focus-visible{outline:2px solid #71866b;outline-offset:2px}
-.topbar{height:64px;padding:0 max(4vw,18px);display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-.logo{font-size:19px;font-weight:850;letter-spacing:-1px}.logo span{color:#71866b}
-.topbar .right{display:flex;align-items:center;gap:14px;font-size:13px}
-.topbar .right a{color:var(--muted)}.topbar .right a:hover{color:var(--green)}
-.btn{border:0;border-radius:5px;padding:10px 15px;font-weight:700;font-size:13px;background:var(--green);color:#fff}
-.btn.ghost{background:#fff;border:1px solid var(--line);color:#4c534a}
-.btn.danger{background:var(--danger)}
-.btn.sm{padding:7px 11px;font-size:12px}
-main{max-width:1180px;margin:auto;padding:28px 20px 70px}
-h1{font:400 30px Georgia,serif;letter-spacing:-.5px;margin:0 0 4px}
-.sub{color:var(--muted);font-size:13px;margin:0 0 22px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.stat{background:#fff;border:1px solid var(--line);padding:16px}
-.stat b{display:block;font:400 26px Georgia,serif}
-.stat span{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#81877d}
-.panel{background:#fff;border:1px solid var(--line)}
-.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
-.panel-head h2{font:400 19px Georgia,serif;margin:0}
-.searchbox input{height:38px;border:1px solid var(--line);border-radius:4px;padding:0 12px;min-width:220px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#81877d;background:#fbfaf7}
-tr:hover td{background:#fcfbf8}
-.thumb{width:46px;height:46px;object-fit:cover;border-radius:4px;background:var(--soft)}
-.pill{display:inline-block;font-size:10px;letter-spacing:.4px;color:#63775c;background:#eef1e9;padding:4px 7px;border-radius:3px;white-space:nowrap}
-.row-actions{display:flex;gap:6px;justify-content:flex-end}
-.empty{padding:44px;text-align:center;color:var(--muted)}
-.overlay{position:fixed;inset:0;background:#17201888;display:none;justify-content:flex-end;z-index:40}.overlay.open{display:flex}
-.drawer{background:#fff;width:min(560px,100%);padding:24px;overflow:auto}
-.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.drawer-head h2{font:400 23px Georgia,serif;margin:0}
-.drawer-head button{border:0;background:none;font-size:26px;line-height:1}
-form.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#5b6259;font-weight:650}
-label.full{grid-column:1/-1}
-input,select,textarea{border:1px solid var(--line);border-radius:4px;padding:9px 11px;font-size:13px;background:#fff;width:100%}
-textarea{resize:vertical;min-height:64px}
-.form-actions{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
-.login-wrap{max-width:380px;margin:9vh auto;background:#fff;border:1px solid var(--line);padding:28px}
-.login-wrap h1{font-size:25px}
-.login-wrap p{color:var(--muted);font-size:13px}
-.login-wrap input{margin:14px 0}
-.login-wrap .btn{width:100%}
-.msg{font-size:12px;margin-top:10px;min-height:16px}.msg.err{color:var(--danger)}.msg.ok{color:#3f6b45}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#283b2d;color:#fff;padding:12px 18px;font-size:12px;border-radius:5px;display:none;z-index:60}.toast.show{display:block}
-[hidden]{display:none!important}
-@media(max-width:780px){.stats{grid-template-columns:repeat(2,1fr)}.hide-sm{display:none}form.grid{grid-template-columns:1fr}}
-</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232447c5'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23fff' text-anchor='middle'%3Er%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
 <div class="topbar">
-  <div class="logo">racik<span>.</span> <small style="font-size:11px;color:#8b8d84;font-weight:650">ADMIN</small></div>
+  <div class="logo">racik<span>.</span> <small style="font:600 13px sans-serif;opacity:.8">admin</small></div>
   <div class="right">
     <a href="/" target="_blank" rel="noopener">Lihat toko ↗</a>
     <span id="roleBadge" class="pill" hidden></span>

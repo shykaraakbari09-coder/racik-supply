@@ -24,6 +24,9 @@ The storefront is a static page that loads its catalog from a serverless API bac
 ```
 index.html        # storefront markup + styles
 admin.html        # admin dashboard markup + styles
+css/
+  site.css        #   storefront styles (tokens, hero receipt, cards, cart drawer)
+  admin.css       #   dashboard styles
 js/
   store.js        #   storefront logic (catalog, persistent cart, WhatsApp links)
   admin.js        #   dashboard logic (login, product CRUD, CSV export)
@@ -37,7 +40,7 @@ lib/
   auth.js         # HMAC-signed session tokens, role password checks, cookie helpers
   sessions.js     # session create/lookup/delete + request auth resolution
   rate-limit.js   # per-IP login failure tracking
-assets/           # product and hero images
+assets/           # product and hero images, self-hosted fonts (assets/fonts)
 test/             # node:test suite (`npm test`)
 vercel.json       # security headers / CSP / caching
 robots.txt, sitemap.xml, 404.html

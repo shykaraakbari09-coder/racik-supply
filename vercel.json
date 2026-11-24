@@ -45,7 +45,7 @@
       ]
     },
     {
-      "source": "/admin",
+      "source": "/(admin|admin.html|api/(.*))",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -54,25 +54,7 @@
       ]
     },
     {
-      "source": "/admin.html",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    },
-    {
-      "source": "/assets/(.*)",
+      "source": "/(assets|js)/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -81,7 +63,7 @@
       ]
     },
     {
-      "source": "/js/(.*)",
+      "source": "/css/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
