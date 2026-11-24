@@ -1,5 +1,9 @@
 import { getSql, ensureSchema, rowToProduct, sanitize } from "../lib/db.js";
-import { isAuthed, readBody } from "../lib/auth.js";
+import { readBody } from "../lib/auth.js";
+import { getAuth } from "../lib/sessions.js";
+
+const canEdit = (role) => role === "admin" || role === "staff";
+const canCreateOrDelete = (role) => role === "admin";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -12,13 +16,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ products: rows.map(rowToProduct) });
     }
 
-    if (!isAuthed(req)) {
+    const auth = await getAuth(req);
+    if (!auth) {
       return res.status(401).json({ error: "Tidak diotorisasi. Silakan login ulang." });
     }
 
     const body = readBody(req);
 
     if (req.method === "POST") {
+      if (!canCreateOrDelete(auth.role)) {
+        return res.status(403).json({ error: "Hanya admin yang boleh menambah produk." });
+      }
       const p = sanitize(body);
       if (!p.name || !p.cat || !p.supplier || !p.tier || !p.unit) {
         return res.status(400).json({ error: "Nama, kategori, supplier, tier, dan satuan wajib diisi." });
@@ -32,6 +40,9 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PUT") {
+      if (!canEdit(auth.role)) {
+        return res.status(403).json({ error: "Tidak punya akses untuk mengubah produk." });
+      }
       const id = Number(body.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "ID tidak valid." });
       const p = sanitize(body);
@@ -52,6 +63,9 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "DELETE") {
+      if (!canCreateOrDelete(auth.role)) {
+        return res.status(403).json({ error: "Hanya admin yang boleh menghapus produk." });
+      }
       const id = Number(req.query.id ?? body.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: "ID tidak valid." });
       const rows = await sql`DELETE FROM products WHERE id = ${id} RETURNING id`;
@@ -62,6 +76,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET, POST, PUT, DELETE");
     return res.status(405).json({ error: "Method not allowed" });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error("products error:", err);
+    return res.status(500).json({ error: "Terjadi kesalahan server." });
   }
 }

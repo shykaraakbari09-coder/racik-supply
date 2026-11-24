@@ -65,16 +65,22 @@ textarea{resize:vertical;min-height:64px}
   <div class="logo">racik<span>.</span> <small style="font-size:11px;color:#8b8d84;font-weight:650">ADMIN</small></div>
   <div class="right">
     <a href="/" target="_blank" rel="noopener">Lihat toko ↗</a>
-    <span id="who" hidden></span>
+    <span id="roleBadge" class="pill" hidden></span>
     <button class="btn ghost sm" id="logoutBtn" hidden>Keluar</button>
   </div>
 </div>
 
 <section class="login-wrap" id="loginView">
-  <h1>Masuk admin</h1>
+  <h1>Masuk</h1>
   <p>Kelola katalog produk Racik Supply.</p>
   <form id="loginForm">
-    <input type="password" id="password" placeholder="Password admin" autocomplete="current-password" required autofocus>
+    <label style="margin-bottom:4px">Masuk sebagai
+      <select id="role" required>
+        <option value="admin">Admin — akses penuh</option>
+        <option value="staff">Staff — hanya edit</option>
+      </select>
+    </label>
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
     <button class="btn" type="submit">Masuk</button>
     <div class="msg err" id="loginMsg"></div>
   </form>
@@ -82,7 +88,7 @@ textarea{resize:vertical;min-height:64px}
 
 <main id="dashView" hidden>
   <h1>Dashboard katalog</h1>
-  <p class="sub">Tambah, ubah, dan hapus produk. Perubahan langsung tampil di halaman toko.</p>
+  <p class="sub" id="dashSub">Kelola katalog produk. Perubahan langsung tampil di halaman toko.</p>
 
   <div class="stats">
     <div class="stat"><b id="statTotal">0</b><span>Total produk</span></div>
@@ -143,6 +149,7 @@ const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp" + Number(n).toLocaleString("id-ID");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 let products = [];
+let currentRole = null;
 let timer;
 
 function toast(t) {
@@ -158,22 +165,44 @@ async function api(path, opts = {}) {
   });
   let data = {};
   try { data = await res.json(); } catch {}
+  if (res.status === 401 || res.status === 403) {
+    if (res.status === 401) showLogin();
+    throw new Error(data.error || "Akses ditolak");
+  }
   if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
   return data;
 }
 
-function showDash() {
+function applyRole(role) {
+  currentRole = role;
+  const isAdmin = role === "admin";
+  $("addBtn").hidden = !isAdmin;
+  $("roleBadge").hidden = !role;
+  $("roleBadge").textContent = role ? role.toUpperCase() : "";
+  $("roleBadge").style.background = isAdmin ? "#e6efe4" : "#f3ecdf";
+  $("roleBadge").style.color = isAdmin ? "#3f6b45" : "#8a755f";
+  $("dashSub").textContent = isAdmin
+    ? "Tambah, ubah, dan hapus produk. Perubahan langsung tampil di halaman toko."
+    : "Mode staff: hanya bisa mengubah produk. Perubahan langsung tampil di halaman toko.";
+}
+
+function showDash(role) {
   $("loginView").hidden = true;
   $("dashView").hidden = false;
   $("logoutBtn").hidden = false;
   $("who").hidden = false;
-  $("who").textContent = "admin";
+  $("who").textContent = role === "admin" ? "admin" : "staff";
+  applyRole(role);
+  render();
 }
 function showLogin() {
+  currentRole = null;
   $("loginView").hidden = false;
   $("dashView").hidden = true;
   $("logoutBtn").hidden = true;
   $("who").hidden = true;
+  $("roleBadge").hidden = true;
+  $("password").value = "";
 }
 
 async function load() {
@@ -195,7 +224,7 @@ function render() {
       <td>${rupiah(p.price)}</td>
       <td><div class="row-actions">
         <button class="btn ghost sm" data-edit="${p.id}">Edit</button>
-        <button class="btn danger sm" data-del="${p.id}">Hapus</button>
+        ${currentRole === "admin" ? `<button class="btn danger sm" data-del="${p.id}">Hapus</button>` : ""}
       </div></td>
     </tr>`).join("");
   $("tableEmpty").hidden = list.length > 0;
@@ -270,8 +299,8 @@ $("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   $("loginMsg").textContent = "";
   try {
-    await api("login", { method: "POST", body: JSON.stringify({ password: $("password").value }) });
-    showDash();
+    const { role } = await api("login", { method: "POST", body: JSON.stringify({ role: $("role").value, password: $("password").value }) });
+    showDash(role);
     await load();
   } catch (err) {
     $("loginMsg").textContent = err.message;
@@ -296,8 +325,8 @@ $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) c
 
 (async function init() {
   try {
-    const { authed } = await api("session");
-    if (authed) { showDash(); await load(); } else showLogin();
+    const { authed, role } = await api("session");
+    if (authed) { showDash(role); await load(); } else showLogin();
   } catch { showLogin(); }
 })();
 </script>

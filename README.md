@@ -25,13 +25,15 @@ The storefront is a static page that loads its catalog from a serverless API bac
 index.html        # storefront: markup, styles, JS (cart, filtering, WhatsApp links)
 admin.html        # admin dashboard: login + product management UI
 api/              # Vercel serverless functions
-  products.js     #   GET (public) / POST / PUT / DELETE (admin)
-  login.js        #   password login, sets signed session cookie
+  products.js     #   GET (public) / PUT (admin+staff) / POST, DELETE (admin)
+  login.js        #   role + password login (rate-limited), sets session cookie
   logout.js       #   clears the session cookie
   session.js      #   reports whether the caller is authenticated
 lib/
   db.js           # Neon connection, schema, seeding, sanitization
-  auth.js         # HMAC-signed session tokens + cookie helpers
+  auth.js         # HMAC-signed session tokens, role password checks, cookie helpers
+  sessions.js     # session create/lookup/delete + request auth resolution
+  rate-limit.js   # per-IP login failure tracking
 assets/           # product and hero images
 vercel.json       # security headers / CSP
 ```
@@ -44,21 +46,32 @@ vercel.json       # security headers / CSP
 
 ## Admin dashboard
 
-Visit `/admin.html` and log in with the admin password. From there you can add, edit, and delete products; changes appear on the storefront immediately.
+Visit `/admin.html`, pick a role, and log in. Changes appear on the storefront immediately.
 
-Auth uses an `HttpOnly`, `Secure`, `SameSite=Strict` cookie holding an HMAC-signed token (12h expiry). All write endpoints require a valid session.
+| Role  | View | Edit | Create | Delete |
+| ----- | :--: | :--: | :----: | :----: |
+| Admin |  ✅  |  ✅  |   ✅   |   ✅   |
+| Staff |  ✅  |  ✅  |   ❌   |   ❌   |
+
+### Security
+
+- Passwords are stored only as Vercel environment variables; comparisons are timing-safe.
+- Login is rate-limited per IP (8 failures / 15 min → HTTP 429) using a DB-backed counter, so it holds across serverless instances.
+- Sessions are server-side rows: the cookie holds an `HttpOnly`, `Secure`, `SameSite=Strict`, HMAC-signed token (4h expiry) referencing a session `sid`. Logout deletes the row, so sessions are truly revocable.
+- All SQL is parameterized; errors return generic messages (details are logged server-side).
 
 ### Required environment variables
 
 Set in the Vercel project (all environments):
 
-| Variable         | Purpose                                        |
-| ---------------- | ---------------------------------------------- |
+| Variable         | Purpose                                         |
+| ---------------- | ----------------------------------------------- |
 | `DATABASE_URL`   | Neon connection string (set by the integration) |
-| `ADMIN_PASSWORD` | Dashboard login password                        |
+| `ADMIN_PASSWORD` | Admin login password                            |
+| `STAFF_PASSWORD` | Staff login password                            |
 | `ADMIN_SECRET`   | Random secret used to sign session tokens       |
 
-Generate a secret with `openssl rand -hex 32`. To change the password:
+Generate a secret with `openssl rand -hex 32`. To change a password:
 
 ```sh
 vercel env rm ADMIN_PASSWORD production
